@@ -14,7 +14,7 @@ pub struct Account {
 #[wasm_bindgen]
 pub struct InboundCreationResult {
     session: Session,
-    plaintext: String,
+    plaintext: Vec<u8>,
 }
 
 #[wasm_bindgen]
@@ -25,7 +25,7 @@ impl InboundCreationResult {
     }
 
     #[wasm_bindgen(getter)]
-    pub fn plaintext(&self) -> String {
+    pub fn plaintext(&self) -> Vec<u8> {
         self.plaintext.clone()
     }
 }
@@ -108,7 +108,7 @@ impl Account {
     }
 
     pub fn generate_one_time_keys(&mut self, count: usize) {
-        self.inner.generate_one_time_keys(count)
+        self.inner.generate_one_time_keys(count);
     }
 
     #[wasm_bindgen(method, getter)]
@@ -124,7 +124,7 @@ impl Account {
     }
 
     pub fn generate_fallback_key(&mut self) {
-        self.inner.generate_fallback_key()
+        self.inner.generate_fallback_key();
     }
 
     pub fn mark_keys_as_published(&mut self) {
@@ -140,9 +140,11 @@ impl Account {
             vodozemac::Curve25519PublicKey::from_base64(identity_key).map_err(error_to_js)?;
         let one_time_key =
             vodozemac::Curve25519PublicKey::from_base64(one_time_key).map_err(error_to_js)?;
-        let session = self
-            .inner
-            .create_outbound_session(identity_key, one_time_key);
+        let session = self.inner.create_outbound_session(
+            vodozemac::olm::SessionConfig::version_1(),
+            identity_key,
+            one_time_key,
+        );
 
         Ok(Session { inner: session })
     }

@@ -59,7 +59,7 @@ impl Session {
         }
     }
 
-    pub fn encrypt(&mut self, plaintext: &str) -> OlmMessage {
+    pub fn encrypt(&mut self, plaintext: &[u8]) -> OlmMessage {
         let message = self.inner.encrypt(plaintext);
 
         let (message_type, ciphertext) = message.to_parts();
@@ -70,7 +70,7 @@ impl Session {
         }
     }
 
-    pub fn decrypt(&mut self, message: &OlmMessage) -> Result<String, JsValue> {
+    pub fn decrypt(&mut self, message: &OlmMessage) -> Result<Vec<u8>, JsValue> {
         let message =
             vodozemac::olm::OlmMessage::from_parts(message.message_type, &message.ciphertext)
                 .map_err(error_to_js)?;

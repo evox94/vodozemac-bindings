@@ -14,7 +14,9 @@ impl GroupSession {
     #[wasm_bindgen(constructor)]
     pub fn new() -> Self {
         Self {
-            inner: vodozemac::megolm::GroupSession::new(),
+            inner: vodozemac::megolm::GroupSession::new(
+                vodozemac::megolm::SessionConfig::version_1(),
+            ),
         }
     }
 
@@ -33,7 +35,7 @@ impl GroupSession {
         self.inner.message_index()
     }
 
-    pub fn encrypt(&mut self, plaintext: &str) -> String {
+    pub fn encrypt(&mut self, plaintext: &[u8]) -> String {
         self.inner.encrypt(plaintext).to_base64()
     }
 
@@ -60,7 +62,7 @@ impl GroupSession {
 
 #[wasm_bindgen(getter_with_clone)]
 pub struct DecryptedMessage {
-    pub plaintext: String,
+    pub plaintext: Vec<u8>,
     pub message_index: u32,
 }
 
@@ -76,7 +78,10 @@ impl InboundGroupSession {
         let key = SessionKey::from_base64(session_key).map_err(error_to_js)?;
 
         Ok(Self {
-            inner: vodozemac::megolm::InboundGroupSession::new(&key),
+            inner: vodozemac::megolm::InboundGroupSession::new(
+                &key,
+                vodozemac::megolm::SessionConfig::version_1(),
+            ),
         })
     }
 
@@ -84,7 +89,10 @@ impl InboundGroupSession {
         let key = ExportedSessionKey::from_base64(session_key).map_err(error_to_js)?;
 
         Ok(Self {
-            inner: vodozemac::megolm::InboundGroupSession::import(&key),
+            inner: vodozemac::megolm::InboundGroupSession::import(
+                &key,
+                vodozemac::megolm::SessionConfig::version_1(),
+            ),
         })
     }
 
